@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le stringhe in Python — secondo triennio</title>
+<style>
+  :root {
+    --lavagna: #263d31; --gesso: #f1efe6; --gesso-tenue: #c3cabf;
+    --giallo: #f3e08a; --azzurro: #a9d6ea; --rosa: #f2b8b0; --verde: #b9e3a8;
+    --riga: rgba(241, 239, 230, 0.26);
+  }
+  * { box-sizing: border-box; }
+  html { background: #5a3b22; }
+  body {
+    margin: 0; min-height: 100vh; color: var(--gesso);
+    font-family: "Chalkboard SE", "Segoe Print", "Comic Neue", "Bradley Hand", "Trebuchet MS", sans-serif;
+    font-size: 18px; line-height: 1.6;
+    background-color: var(--lavagna);
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(255,255,255,0.07), transparent 55%),
+      radial-gradient(ellipse at 80% 70%, rgba(255,255,255,0.05), transparent 50%),
+      radial-gradient(ellipse at 50% 120%, rgba(0,0,0,0.25), transparent 60%),
+      repeating-linear-gradient(115deg, rgba(255,255,255,0.012) 0 2px, transparent 2px 9px);
+    background-attachment: fixed;
+    border: 16px solid #6b4528;
+    box-shadow: inset 0 0 60px rgba(0,0,0,0.55);
+    text-shadow: 0 0 1px rgba(241,239,230,0.45);
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 40px 26px 110px; }
+  header { border-bottom: 2px dashed var(--riga); padding-bottom: 16px; margin-bottom: 26px; }
+  .occhiello { font-size: 14px; letter-spacing: .14em; text-transform: uppercase; color: var(--giallo); margin: 0 0 6px; }
+  h1 { font-size: 38px; line-height: 1.15; margin: 0 0 8px; }
+  h2 { font-size: 27px; margin: 50px 0 14px; color: var(--giallo); border-bottom: 1px solid var(--riga); padding-bottom: 4px; }
+  h3 { font-size: 20px; margin: 26px 0 8px; color: var(--azzurro); }
+  .sotto { color: var(--gesso-tenue); margin: 0; }
+  code {
+    font-family: "Fira Code", "Consolas", "Courier New", monospace; font-size: .9em;
+    color: var(--giallo); background: rgba(0,0,0,.22); padding: 1px 5px; border-radius: 3px; text-shadow: none;
+  }
+  .riquadro { border: 2px solid var(--riga); border-radius: 6px; padding: 12px 18px; margin: 18px 0; font-size: 16.5px; }
+  .riquadro p { margin: 5px 0; } .riquadro ul { margin: 5px 0; padding-left: 22px; }
+  ol.passi { counter-reset: passo; list-style: none; padding: 0; margin: 0; }
+  ol.passi > li { counter-increment: passo; position: relative; padding: 13px 0 15px 62px; border-bottom: 1px dashed var(--riga); }
+  ol.passi > li::before {
+    content: counter(passo); position: absolute; left: 0; top: 10px;
+    width: 42px; height: 42px; border-radius: 50%;
+    border: 2px solid var(--giallo); color: var(--giallo);
+    font-size: 21px; line-height: 38px; text-align: center;
+  }
+  ol.passi .titolo { display: block; font-weight: bold; margin-bottom: 2px; }
+  ol.passi p { margin: 2px 0; }
+  .fase { font-size: 14px; letter-spacing: .1em; text-transform: uppercase; color: var(--rosa); margin: 30px 0 4px; }
+  .codice {
+    margin: 10px 0 4px; border: 1px solid var(--riga); border-radius: 6px; overflow: hidden;
+    background: rgba(0,0,0,.25); text-shadow: none;
+  }
+  .codice pre {
+    margin: 0; padding: 10px 14px; overflow-x: auto;
+    font-family: "Fira Code", "Consolas", "Courier New", monospace; font-size: 15.5px; line-height: 1.5;
+    color: var(--gesso);
+  }
+  .codice pre.output { color: var(--verde); background: rgba(0,0,0,.2); }
+  .codice .eti {
+    font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--azzurro); padding: 5px 14px 0;
+  }
+  .codice .eti.out { color: var(--verde); background: rgba(0,0,0,.2); border-top: 1px dashed var(--riga); }
+  .avvertenza, .attenzione, .nota { padding: 11px 16px; margin: 14px 0; font-size: 16px; border: 2px solid; border-radius: 4px; }
+  .avvertenza { border-color: var(--rosa); color: var(--rosa); }
+  .attenzione { border-color: var(--giallo); color: var(--giallo); }
+  .nota { border-color: var(--verde); color: var(--verde); }
+  table { border-collapse: collapse; width: 100%; font-size: 16px; margin: 12px 0; }
+  th, td { border: 1px solid var(--riga); padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { color: var(--giallo); font-weight: normal; }
+  .tenue { color: var(--gesso-tenue); font-size: 15px; }
+
+  /* Schema degli indici */
+  .schema { margin: 18px 0 8px; overflow-x: auto; }
+  .schema table { width: auto; margin: 0 auto; border: none; font-size: 17px; }
+  .schema td { border: none; text-align: center; width: 54px; padding: 4px 0; }
+  .schema .car td {
+    border: 2px solid var(--gesso); font-family: "Courier New", monospace;
+    font-size: 26px; font-weight: bold; color: var(--gesso);
+  }
+  .schema .pos td { color: var(--giallo); }
+  .schema .neg td { color: var(--rosa); }
+  .schema td.lab { width: auto; text-align: right; padding-right: 12px; font-size: 14px; color: var(--gesso-tenue); border: none !important; }
+
+  details { border: 1px dashed var(--riga); border-radius: 6px; padding: 6px 14px; margin: 8px 0 0; }
+  summary { cursor: pointer; color: var(--azzurro); font-size: 15.5px; }
+  ol.esercizi > li { margin: 16px 0; }
+
+  footer.nota-lingua { margin-top: 56px; border-top: 1px dashed var(--riga); padding-top: 14px; font-size: 14.5px; color: var(--gesso-tenue); }
+  .firma {
+    position: fixed; right: 30px; bottom: 26px; font-size: 22px; color: var(--gesso);
+    transform: rotate(-4deg); border-bottom: 2px solid var(--gesso-tenue);
+    padding: 0 4px 2px; background: rgba(38, 61, 49, 0.88); z-index: 10;
+  }
+  .cancellino {
+    position: fixed; left: 34px; bottom: 18px; width: 92px; height: 22px; border-radius: 3px;
+    background: linear-gradient(#7a5233 0 55%, #d9d6cc 55%); box-shadow: 0 2px 4px rgba(0,0,0,.4); opacity: .85;
+  }
+  @media (max-width: 640px) { h1 { font-size: 29px; } .cancellino { display: none; } body { border-width: 8px; font-size: 17px; } ol.passi > li { padding-left: 52px; } }
+  @media print {
+    html, body { background: #fff; color: #000; border: none; box-shadow: none; text-shadow: none; }
+    h2, h3, th, .occhiello, .fase, code, .codice pre, .codice pre.output, .codice .eti, ol.passi > li::before,
+    .schema td, .avvertenza, .attenzione, .nota { color: #000 !important; border-color: #000 !important; background: none !important; }
+    .firma { position: static; display: block; text-align: right; background: none; color: #000; transform: none; border: none; margin-top: 30px; }
+    .cancellino { display: none; }
+    details { display: none; }
+    .demo, .solo-anim, .polvere { display: none !important; }
+    .entra { opacity: 1 !important; transform: none !important; }
+  }
+
+  /* ================= ANIMAZIONI ================= */
+
+  /* Titolo digitato come codice, con cursore */
+  h1 .digitato { border-right: 3px solid var(--giallo); padding-right: 4px; animation: cursore .8s steps(1) infinite; }
+  h1 .digitato.fine { animation: cursore .8s steps(1) 4 forwards; }
+  @keyframes cursore { 50% { border-color: transparent; } }
+  .occhiello, .sotto { opacity: 0; animation: compari .8s ease forwards; }
+  .occhiello { animation-delay: .1s; } .sotto { animation-delay: 1.4s; }
+  @keyframes compari { to { opacity: 1; } }
+
+  /* Schema: i caratteri cadono sulla lavagna uno alla volta */
+  .schema .car td:not(.lab), .schema .pos td:not(.lab), .schema .neg td:not(.lab) {
+    transition: background .25s, color .25s, transform .25s;
+  }
+  .schema.anim .car td:not(.lab) { animation: cade .5s cubic-bezier(.2,.9,.3,1.3) both; }
+  .schema.anim .pos td:not(.lab), .schema.anim .neg td:not(.lab) { animation: compari .4s ease both; opacity: 0; }
+  @keyframes cade { from { opacity: 0; transform: translateY(-24px) rotate(-8deg); } to { opacity: 1; transform: none; } }
+  .schema td.acceso { background: rgba(243,224,138,.22); transform: translateY(-3px); }
+  .schema .car td.acceso { color: var(--giallo); border-color: var(--giallo); }
+  .schema .pos td.acceso, .schema .neg td.acceso { transform: scale(1.3); background: none; }
+  .schema .car td:not(.lab) { cursor: default; }
+
+  .demo {
+    display: flex; justify-content: center; align-items: center; gap: 14px; margin: 10px 0 2px;
+    font-family: "Fira Code", "Consolas", "Courier New", monospace; font-size: 21px; text-shadow: none;
+  }
+  .demo-espr { color: var(--azzurro); min-width: 110px; text-align: right; }
+  .demo-freccia { color: var(--gesso-tenue); }
+  .demo-ris { color: var(--verde); min-width: 110px; }
+  .demo span { transition: opacity .3s, transform .3s; }
+  .demo.cambio .demo-espr, .demo.cambio .demo-ris { opacity: 0; transform: translateY(6px); }
+
+  /* Passi che entrano scorrendo */
+  .entra { opacity: 0; transform: translateX(-18px); }
+  .entra.visibile { opacity: 1; transform: none; transition: opacity .6s ease, transform .6s cubic-bezier(.2,.8,.3,1.1); }
+  ol.passi > li.entra.visibile::before { animation: timbro .5s cubic-bezier(.2,.9,.3,1.5) .15s both; }
+  @keyframes timbro { from { transform: scale(0) rotate(-90deg); } to { transform: none; } }
+
+  /* Output che "gira": le righe compaiono una dopo l'altra */
+  .codice pre.output .riga { display: block; opacity: 0; transform: translateX(-6px); }
+  .codice.eseguito pre.output .riga { opacity: 1; transform: none; transition: opacity .3s ease, transform .3s ease; }
+  .codice .eti.out::after { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: 8px; background: var(--verde); opacity: 0; }
+  .codice.in-esecuzione .eti.out::after { animation: led .4s ease-in-out infinite alternate; }
+  @keyframes led { from { opacity: .2; } to { opacity: 1; } }
+  .codice { transition: border-color .3s; }
+  .codice.in-esecuzione { border-color: var(--verde); }
+
+  /* Firma e cancellino */
+  .firma { animation: firma 1s ease 1.6s both; }
+  @keyframes firma { from { opacity: 0; transform: rotate(-12deg) translateY(10px); } to { opacity: 1; transform: rotate(-4deg); } }
+  .cancellino { animation: cancella 9s ease-in-out infinite; }
+  @keyframes cancella { 0%, 80%, 100% { transform: translateX(0); } 85% { transform: translateX(16px); } 90% { transform: translateX(-6px); } 95% { transform: translateX(10px); } }
+
+  details[open] > *:not(summary) { animation: compari .4s ease; }
+
+  /* Polvere di gesso al clic */
+  .polvere {
+    position: fixed; width: 5px; height: 5px; border-radius: 50%;
+    background: rgba(241,239,230,.8); pointer-events: none; z-index: 20;
+    animation: polvere .9s ease-out forwards;
+  }
+  @keyframes polvere { to { transform: translate(var(--dx), var(--dy)) scale(.2); opacity: 0; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .occhiello, .sotto, .firma { opacity: 1; }
+    .entra { opacity: 1; transform: none; }
+    .codice pre.output .riga { opacity: 1; transform: none; }
+    .schema.anim .pos td, .schema.anim .neg td { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <p class="occhiello">Informatica · Python · Secondo triennio</p>
+  <h1>Le stringhe in Python</h1>
+  <p class="sotto">Creare, leggere, trasformare e formattare il testo, con esempi di biologia e chimica.</p>
+</header>
+
+<div class="riquadro">
+  <p><strong>Prerequisiti:</strong> variabili, tipi <code>int</code> e <code>float</code>, funzione <code>print()</code>, ciclo <code>for</code>, liste e dizionari di base.</p>
+  <p><strong>Obiettivi.</strong> Alla fine di questa lezione, lo studente:</p>
+  <ul>
+    <li>crea stringhe con apici, virgolette e sequenze di escape;</li>
+    <li>legge caratteri e sottostringhe con indici e slicing;</li>
+    <li>spiega il concetto di immutabilità;</li>
+    <li>usa i metodi principali e le f-string;</li>
+    <li>scrive una funzione che elabora una sequenza di DNA.</li>
+  </ul>
+  <p class="tenue">Versione di riferimento: Python 3.8 o successiva. Tutti gli output sono stati generati eseguendo il codice.</p>
+</div>
+
+<h2>Lo schema da ricordare</h2>
+<div class="schema">
+  <table>
+    <tr class="pos"><td class="lab">indice positivo</td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+    <tr class="car"><td class="lab">s = </td><td>P</td><td>Y</td><td>T</td><td>H</td><td>O</td><td>N</td></tr>
+    <tr class="neg"><td class="lab">indice negativo</td><td>-6</td><td>-5</td><td>-4</td><td>-3</td><td>-2</td><td>-1</td></tr>
+  </table>
+</div>
+<div class="demo" aria-live="polite">
+  <span class="demo-espr" id="demoEspr">s[0]</span>
+  <span class="demo-freccia">→</span>
+  <span class="demo-ris" id="demoRis">'P'</span>
+</div>
+<p class="tenue" style="text-align:center">La stringa ha 6 caratteri. Gli indici positivi vanno da 0 a 5.<br>
+<span class="solo-anim">Passate il mouse su un carattere per vedere i suoi due indici.</span></p>
+
+<h2>Parte A — Le stringhe passo per passo</h2>
+
+<p class="fase">Fase 1 · Creare una stringa</p>
+<ol class="passi" style="counter-reset: passo 0;">
+<li><span class="titolo">Una stringa è una sequenza di caratteri.</span><p>Una stringa contiene lettere, cifre, spazi e simboli.</p><p>In Python, il tipo di una stringa è <code>str</code>.</p><p>Scrivete il testo tra apici singoli o tra virgolette doppie.</p><div class="codice"><div class="eti">codice</div><pre>nome = &#x27;Ada&#x27;
+saluto = &quot;Ciao&quot;
+print(type(nome))
+print(saluto, nome)</pre><div class="eti out">output</div><pre class="output">&lt;class &#x27;str&#x27;&gt;
+Ciao Ada</pre></div></li>
+<li><span class="titolo">Usate le virgolette triple per un testo su più righe.</span><p>Le virgolette triple conservano gli "a capo".</p><p>Usate questa forma anche per i commenti di documentazione (docstring).</p><div class="codice"><div class="eti">codice</div><pre>poesia = &quot;&quot;&quot;Nel mezzo
+del cammin&quot;&quot;&quot;
+print(poesia)</pre><div class="eti out">output</div><pre class="output">Nel mezzo
+del cammin</pre></div></li>
+<li><span class="titolo">Usate le sequenze di escape per i caratteri speciali.</span><p>La barra rovesciata <code>\</code> cambia il significato del carattere successivo.</p><p><code>\n</code> è un a capo. <code>\t</code> è una tabulazione.</p><p><code>\'</code> inserisce un apice nella stringa.</p><div class="codice"><div class="eti">codice</div><pre>print(&#x27;L\&#x27;atomo\tdi carbonio&#x27;)
+print(&quot;Riga 1\nRiga 2&quot;)
+print(len(&quot;\n&quot;))</pre><div class="eti out">output</div><pre class="output">L&#x27;atomo	di carbonio
+Riga 1
+Riga 2
+1</pre></div></li>
+</ol>
+<p class="fase">Fase 2 · Leggere i caratteri</p>
+<ol class="passi" style="counter-reset: passo 3;">
+<li><span class="titolo">Ogni carattere ha un indice.</span><p>Il primo carattere ha indice 0.</p><p>L'ultimo carattere ha indice <code>len(s) - 1</code>.</p><p>La funzione <code>len()</code> restituisce il numero di caratteri.</p><div class="codice"><div class="eti">codice</div><pre>s = &quot;PYTHON&quot;
+print(len(s))
+print(s[0])
+print(s[5])</pre><div class="eti out">output</div><pre class="output">6
+P
+N</pre></div></li>
+<li><span class="titolo">Usate gli indici negativi per contare dalla fine.</span><p>L'indice -1 indica l'ultimo carattere.</p><p>L'indice -2 indica il penultimo carattere.</p><div class="codice"><div class="eti">codice</div><pre>s = &quot;PYTHON&quot;
+print(s[-1])
+print(s[-2])</pre><div class="eti out">output</div><pre class="output">N
+O</pre></div></li>
+<li><span class="titolo">Non usate un indice fuori dall'intervallo.</span><p>Un indice troppo grande causa un errore <code>IndexError</code>.</p><p>Il programma si ferma.</p><div class="codice"><div class="eti">codice</div><pre>s = &quot;PYTHON&quot;
+try:
+    print(s[6])
+except IndexError as e:
+    print(&quot;IndexError:&quot;, e)</pre><div class="eti out">output</div><pre class="output">IndexError: string index out of range</pre></div></li>
+<li><span class="titolo">Usate lo slicing per estrarre una parte della stringa.</span><p>La sintassi è <code>s[inizio:fine:passo]</code>.</p><p>Python include l'indice di inizio. Python esclude l'indice di fine.</p><p>Se non scrivete un valore, Python usa il valore predefinito.</p><div class="codice"><div class="eti">codice</div><pre>s = &quot;PYTHON&quot;
+print(s[0:2])
+print(s[2:])
+print(s[:3])
+print(s[::2])
+print(s[::-1])</pre><div class="eti out">output</div><pre class="output">PY
+THON
+PYT
+PTO
+NOHTYP</pre></div></li>
+</ol>
+<p class="fase">Fase 3 · Immutabilità</p>
+<ol class="passi" style="counter-reset: passo 7;">
+<li><span class="titolo">Una stringa è immutabile.</span><p>Non potete cambiare un carattere di una stringa esistente.</p><p>Per un risultato diverso, create una nuova stringa.</p><div class="codice"><div class="eti">codice</div><pre>s = &quot;gatto&quot;
+try:
+    s[0] = &quot;m&quot;
+except TypeError as e:
+    print(&quot;TypeError:&quot;, e)
+s = &quot;m&quot; + s[1:]
+print(s)</pre><div class="eti out">output</div><pre class="output">TypeError: &#x27;str&#x27; object does not support item assignment
+matto</pre></div></li>
+</ol>
+<p class="fase">Fase 4 · Operatori</p>
+<ol class="passi" style="counter-reset: passo 8;">
+<li><span class="titolo">Usate + per unire e * per ripetere.</span><p>L'operatore <code>+</code> unisce due stringhe (concatenazione).</p><p>L'operatore <code>*</code> ripete una stringa per un numero intero di volte.</p><div class="codice"><div class="eti">codice</div><pre>print(&quot;bio&quot; + &quot;logia&quot;)
+print(&quot;ah&quot; * 3)
+print(&quot;-&quot; * 20)</pre><div class="eti out">output</div><pre class="output">biologia
+ahahah
+--------------------</pre></div></li>
+<li><span class="titolo">Non unite una stringa e un numero.</span><p>Python non converte i tipi in modo automatico.</p><p>Usate <code>str()</code> per convertire il numero in stringa.</p><div class="codice"><div class="eti">codice</div><pre>eta = 16
+try:
+    print(&quot;Ho &quot; + eta + &quot; anni&quot;)
+except TypeError as e:
+    print(&quot;TypeError:&quot;, e)
+print(&quot;Ho &quot; + str(eta) + &quot; anni&quot;)</pre><div class="eti out">output</div><pre class="output">TypeError: can only concatenate str (not &quot;int&quot;) to str
+Ho 16 anni</pre></div></li>
+<li><span class="titolo">Usate <code>in</code> per cercare una sottostringa.</span><p>L'operatore <code>in</code> restituisce <code>True</code> o <code>False</code>.</p><p>Il confronto distingue maiuscole e minuscole.</p><div class="codice"><div class="eti">codice</div><pre>dna = &quot;ATGCGTA&quot;
+print(&quot;GCG&quot; in dna)
+print(&quot;gcg&quot; in dna)</pre><div class="eti out">output</div><pre class="output">True
+False</pre></div></li>
+</ol>
+<p class="fase">Fase 5 · Metodi</p>
+<ol class="passi" style="counter-reset: passo 11;">
+<li><span class="titolo">Un metodo è una funzione della stringa.</span><p>Scrivete il nome della variabile, un punto e il nome del metodo.</p><p>Il metodo restituisce una nuova stringa. La stringa originale non cambia.</p><div class="codice"><div class="eti">codice</div><pre>s = &quot;  Mitocondrio  &quot;
+print(s.upper())
+print(s.lower())
+print(s.strip())
+print(repr(s))</pre><div class="eti out">output</div><pre class="output">  MITOCONDRIO  
+  mitocondrio  
+Mitocondrio
+&#x27;  Mitocondrio  &#x27;</pre></div></li>
+<li><span class="titolo">Usate i metodi per cercare e sostituire.</span><p><code>find()</code> restituisce l'indice della prima occorrenza, oppure -1.</p><p><code>count()</code> conta le occorrenze.</p><p><code>replace()</code> sostituisce una sottostringa con un'altra.</p><div class="codice"><div class="eti">codice</div><pre>dna = &quot;ATGCGTATGA&quot;
+print(dna.find(&quot;TG&quot;))
+print(dna.find(&quot;CCC&quot;))
+print(dna.count(&quot;A&quot;))
+print(dna.replace(&quot;T&quot;, &quot;U&quot;))</pre><div class="eti out">output</div><pre class="output">1
+-1
+3
+AUGCGUAUGA</pre></div></li>
+<li><span class="titolo">Usate <code>split()</code> e <code>join()</code> per le liste.</span><p><code>split()</code> divide una stringa e restituisce una lista.</p><p><code>join()</code> unisce gli elementi di una lista in una stringa.</p><div class="codice"><div class="eti">codice</div><pre>riga = &quot;Na,K,Ca,Mg&quot;
+elementi = riga.split(&quot;,&quot;)
+print(elementi)
+print(&quot; - &quot;.join(elementi))</pre><div class="eti out">output</div><pre class="output">[&#x27;Na&#x27;, &#x27;K&#x27;, &#x27;Ca&#x27;, &#x27;Mg&#x27;]
+Na - K - Ca - Mg</pre></div></li>
+<li><span class="titolo">Usate i metodi di controllo.</span><p>Questi metodi restituiscono <code>True</code> o <code>False</code>.</p><div class="codice"><div class="eti">codice</div><pre>print(&quot;ATG&quot;.startswith(&quot;A&quot;))
+print(&quot;2026&quot;.isdigit())
+print(&quot;H2O&quot;.isalpha())</pre><div class="eti out">output</div><pre class="output">True
+True
+False</pre></div></li>
+</ol>
+<p class="fase">Fase 6 · Formattazione e conversione</p>
+<ol class="passi" style="counter-reset: passo 15;">
+<li><span class="titolo">Usate le f-string per inserire valori nel testo.</span><p>Scrivete <code>f</code> prima delle virgolette.</p><p>Scrivete le variabili tra parentesi graffe.</p><p>Dopo i due punti, indicate il formato del numero.</p><div class="codice"><div class="eti">codice</div><pre>nome = &quot;glucosio&quot;
+massa = 180.156
+print(f&quot;La massa molare del {nome} è {massa:.2f} g/mol&quot;)
+print(f&quot;{&#x27;C&#x27;:&gt;5}|{&#x27;H&#x27;:^5}|{&#x27;O&#x27;:&lt;5}|&quot;)</pre><div class="eti out">output</div><pre class="output">La massa molare del glucosio è 180.16 g/mol
+    C|  H  |O    |</pre></div></li>
+<li><span class="titolo">Convertite tra stringhe e numeri.</span><p><code>input()</code> restituisce sempre una stringa.</p><p>Usate <code>int()</code> o <code>float()</code> per ottenere un numero.</p><div class="codice"><div class="eti">codice</div><pre>testo = &quot;37.5&quot;
+t = float(testo)
+print(t + 1)
+print(int(&quot;42&quot;) * 2)</pre><div class="eti out">output</div><pre class="output">38.5
+84</pre></div></li>
+<li><span class="titolo">Ogni carattere ha un codice numerico.</span><p><code>ord()</code> restituisce il codice Unicode di un carattere.</p><p><code>chr()</code> restituisce il carattere di un codice.</p><p>Python confronta le stringhe con questi codici, carattere per carattere.</p><div class="codice"><div class="eti">codice</div><pre>print(ord(&quot;A&quot;), ord(&quot;a&quot;))
+print(chr(67))
+print(&quot;Zebra&quot; &lt; &quot;ape&quot;)</pre><div class="eti out">output</div><pre class="output">65 97
+C
+True</pre></div></li>
+</ol>
+<p class="fase">Fase 7 · Scorrere una stringa</p>
+<ol class="passi" style="counter-reset: passo 18;">
+<li><span class="titolo">Usate un ciclo for per leggere ogni carattere.</span><p>Il ciclo legge i caratteri da sinistra a destra.</p><p>Usate <code>enumerate()</code> per avere anche l'indice.</p><div class="codice"><div class="eti">codice</div><pre>for i, base in enumerate(&quot;ATG&quot;):
+    print(i, base)</pre><div class="eti out">output</div><pre class="output">0 A
+1 T
+2 G</pre></div></li>
+<li><span class="titolo">Esempio completo: il filamento complementare del DNA.</span><p>Il programma legge ogni base e scrive la base complementare.</p><p>Il programma costruisce una nuova stringa, perché la stringa originale è immutabile.</p><div class="codice"><div class="eti">codice</div><pre>def complementare(dna):
+    coppie = {&quot;A&quot;: &quot;T&quot;, &quot;T&quot;: &quot;A&quot;, &quot;C&quot;: &quot;G&quot;, &quot;G&quot;: &quot;C&quot;}
+    risultato = &quot;&quot;
+    for base in dna.upper():
+        risultato += coppie[base]
+    return risultato
+
+print(complementare(&quot;atgcgt&quot;))</pre><div class="eti out">output</div><pre class="output">TACGCA</pre></div></li>
+</ol>
+
+<div class="nota">
+  <p><strong>NOTA:</strong> Nel passo 20, l'operatore <code>+=</code> crea una nuova stringa a ogni ciclo. Per testi molto lunghi, il metodo <code>"".join(lista)</code> è più veloce.</p>
+</div>
+
+<h2>Parte B — Tabella riassuntiva</h2>
+<table>
+  <tr><th>Operazione</th><th>Sintassi</th><th>Risultato con <code>s = "Atomo"</code></th></tr>
+  <tr><td>Lunghezza</td><td><code>len(s)</code></td><td><code>5</code></td></tr>
+  <tr><td>Primo carattere</td><td><code>s[0]</code></td><td><code>'A'</code></td></tr>
+  <tr><td>Ultimo carattere</td><td><code>s[-1]</code></td><td><code>'o'</code></td></tr>
+  <tr><td>Sottostringa</td><td><code>s[1:3]</code></td><td><code>'to'</code></td></tr>
+  <tr><td>Rovesciare</td><td><code>s[::-1]</code></td><td><code>'omotA'</code></td></tr>
+  <tr><td>Maiuscolo</td><td><code>s.upper()</code></td><td><code>'ATOMO'</code></td></tr>
+  <tr><td>Cercare</td><td><code>s.find("o")</code></td><td><code>2</code></td></tr>
+  <tr><td>Contare</td><td><code>s.count("o")</code></td><td><code>2</code></td></tr>
+  <tr><td>Sostituire</td><td><code>s.replace("o", "0")</code></td><td><code>'At0m0'</code></td></tr>
+  <tr><td>Appartenenza</td><td><code>"tom" in s</code></td><td><code>True</code></td></tr>
+</table>
+
+<h2>Parte C — Errori frequenti</h2>
+<table>
+  <tr><th>Errore</th><th>Causa</th><th>Correzione</th></tr>
+  <tr><td><code>IndexError</code></td><td>Indice uguale o maggiore di <code>len(s)</code>.</td><td>Usate un indice da 0 a <code>len(s) - 1</code>.</td></tr>
+  <tr><td><code>TypeError</code> (assegnazione)</td><td>Modifica di un carattere: <code>s[0] = "x"</code>.</td><td>Create una nuova stringa.</td></tr>
+  <tr><td><code>TypeError</code> (concatenazione)</td><td>Unione di <code>str</code> e <code>int</code>.</td><td>Usate <code>str()</code> o una f-string.</td></tr>
+  <tr><td>Metodo "senza effetto"</td><td><code>s.upper()</code> senza assegnazione.</td><td>Scrivete <code>s = s.upper()</code>.</td></tr>
+  <tr><td>Somma come testo</td><td><code>input()</code> restituisce una stringa: <code>"2" + "3"</code> dà <code>"23"</code>.</td><td>Convertite con <code>int()</code> o <code>float()</code>.</td></tr>
+</table>
+
+<h2>Parte D — Esercizi</h2>
+<ol class="esercizi">
+  <li>Data <code>s = "fotosintesi"</code>, scrivete l'output di <code>s[2:6]</code>, <code>s[-3:]</code> e <code>s[::3]</code>. Verificate con Python.
+    <details><summary>Soluzione</summary><p><code>'tosi'</code>, <code>'esi'</code>, <code>'fons'</code></p></details>
+  </li>
+  <li>Scrivete una funzione che calcola la percentuale di G e C in una sequenza di DNA.
+    <details><summary>Soluzione</summary>
+      <div class="codice"><pre>def gc(dna):
+    dna = dna.upper()
+    return (dna.count("G") + dna.count("C")) / len(dna) * 100
+
+print(f"{gc('ATGCGC'):.1f}%")   # 66.7%</pre></div>
+    </details>
+  </li>
+  <li>Scrivete una funzione che trascrive il DNA in RNA (T → U).
+    <details><summary>Soluzione</summary><div class="codice"><pre>def trascrivi(dna):
+    return dna.upper().replace("T", "U")</pre></div></details>
+  </li>
+  <li>Scrivete una funzione che controlla se una parola è palindroma. Ignorate maiuscole e spazi.
+    <details><summary>Soluzione</summary><div class="codice"><pre>def palindroma(testo):
+    t = testo.replace(" ", "").lower()
+    return t == t[::-1]
+
+print(palindroma("I topi non avevano nipoti"))   # True</pre></div></details>
+  </li>
+  <li>Data la riga <code>"H;1.008;Idrogeno"</code>, stampate: <code>Idrogeno (H): 1.01 u</code>.
+    <details><summary>Soluzione</summary><div class="codice"><pre>simbolo, massa, nome = "H;1.008;Idrogeno".split(";")
+print(f"{nome} ({simbolo}): {float(massa):.2f} u")</pre></div></details>
+  </li>
+  <li>Spiegate perché <code>"Zebra" &lt; "ape"</code> restituisce <code>True</code>.
+    <details><summary>Soluzione</summary><p>Python confronta i codici Unicode. Il codice di "Z" è 90. Il codice di "a" è 97. 90 è minore di 97.</p></details>
+  </li>
+</ol>
+
+<h2>Glossario</h2>
+<p class="tenue">Regola ASD-STE100: un termine, un solo significato. Il testo usa solo questi termini per questi concetti.</p>
+<table>
+  <tr><th>Termine</th><th>Significato in questo testo</th></tr>
+  <tr><td>Stringa</td><td>Sequenza ordinata e immutabile di caratteri (tipo <code>str</code>).</td></tr>
+  <tr><td>Indice</td><td>Numero intero che indica la posizione di un carattere.</td></tr>
+  <tr><td>Slicing</td><td>Estrazione di una sottostringa con <code>[inizio:fine:passo]</code>.</td></tr>
+  <tr><td>Sottostringa</td><td>Parte continua di una stringa.</td></tr>
+  <tr><td>Immutabile</td><td>Che non cambia dopo la creazione.</td></tr>
+  <tr><td>Metodo</td><td>Funzione collegata a un oggetto. Si scrive con il punto: <code>s.upper()</code>.</td></tr>
+  <tr><td>Concatenazione</td><td>Unione di due stringhe con <code>+</code>.</td></tr>
+  <tr><td>Sequenza di escape</td><td>Barra rovesciata seguita da un carattere con significato speciale.</td></tr>
+  <tr><td>f-string</td><td>Stringa con prefisso <code>f</code> che inserisce valori tra parentesi graffe.</td></tr>
+</table>
+
+<footer class="nota-lingua">
+  <p><strong>Nota sul linguaggio.</strong> ASD-STE100 è definito per la lingua inglese. Qui le sue regole principali sono adattate all'italiano: frasi brevi (procedure ≤ 20 parole, descrizioni ≤ 25), un'istruzione per frase, forma attiva, imperativo nelle istruzioni, avvertenze prima del passo, un termine per ogni concetto. Le parole chiave di Python e i nomi tecnici (slicing, f-string, escape) sono ammessi come <em>technical names</em>. Livello di conformità stimato: circa 80%.</p>
+</footer>
+
+</main>
+
+<div class="cancellino" aria-hidden="true"></div>
+<div class="firma">Proff. Taibbi</div>
+
+<script>
+(function () {
+  var fermo = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var schema = document.querySelector('.schema');
+  var celle = {
+    car: [].slice.call(schema.querySelectorAll('.car td:not(.lab)')),
+    pos: [].slice.call(schema.querySelectorAll('.pos td:not(.lab)')),
+    neg: [].slice.call(schema.querySelectorAll('.neg td:not(.lab)'))
+  };
+
+  function accendi(indici) {
+    ['car', 'pos', 'neg'].forEach(function (k) {
+      celle[k].forEach(function (td, i) { td.classList.toggle('acceso', indici.indexOf(i) !== -1); });
+    });
+  }
+
+  // Passaggio del mouse su un carattere: mostra i due indici
+  celle.car.forEach(function (td, i) {
+    td.addEventListener('mouseenter', function () { pausa = true; accendi([i]); });
+    td.addEventListener('mouseleave', function () { pausa = false; accendi([]); });
+  });
+
+  if (fermo) { document.querySelector('.demo').style.display = 'none'; return; }
+
+  // ---- Titolo digitato ----
+  var h1 = document.querySelector('h1');
+  var testo = h1.textContent;
+  h1.innerHTML = '<span class="digitato"></span>';
+  var span = h1.firstChild, k = 0;
+  (function scrivi() {
+    span.textContent = testo.slice(0, ++k);
+    if (k < testo.length) setTimeout(scrivi, 55 + Math.random() * 60);
+    else span.classList.add('fine');
+  })();
+
+  // ---- Schema: entrata dei caratteri ----
+  schema.classList.add('anim');
+  ['car', 'pos', 'neg'].forEach(function (riga, r) {
+    celle[riga].forEach(function (td, i) { td.style.animationDelay = (0.4 + i * 0.12 + r * 0.9) + 's'; });
+  });
+
+  // ---- Dimostrazione dello slicing ----
+  var demo = document.querySelector('.demo');
+  var espr = document.getElementById('demoEspr'), ris = document.getElementById('demoRis');
+  var s = 'PYTHON';
+  var esempi = [
+    ['s[0]', [0]], ['s[5]', [5]], ['s[-1]', [5]], ['s[-2]', [4]],
+    ['s[0:2]', [0, 1]], ['s[2:]', [2, 3, 4, 5]], ['s[:3]', [0, 1, 2]],
+    ['s[1:5:2]', [1, 3]], ['s[::2]', [0, 2, 4]], ['s[::-1]', [5, 4, 3, 2, 1, 0]]
+  ];
+  var n = 0, pausa = false;
+  function mostra() {
+    if (pausa) return;
+    var e = esempi[n % esempi.length];
+    demo.classList.add('cambio');
+    setTimeout(function () {
+      espr.textContent = e[0];
+      ris.textContent = "'" + e[1].map(function (i) { return s[i]; }).join('') + "'";
+      demo.classList.remove('cambio');
+      accendi(e[1]);
+    }, 300);
+    n++;
+  }
+  accendi([]);
+  setTimeout(function () { mostra(); setInterval(mostra, 2600); }, 3600);
+
+  // ---- Passi e codice che entrano scorrendo ----
+  if ('IntersectionObserver' in window) {
+    var passi = document.querySelectorAll('ol.passi > li');
+    passi.forEach(function (li) { li.classList.add('entra'); });
+    var ioPassi = new IntersectionObserver(function (voci) {
+      voci.forEach(function (v) {
+        if (v.isIntersecting) { v.target.classList.add('visibile'); ioPassi.unobserve(v.target); }
+      });
+    }, { threshold: 0.12 });
+    passi.forEach(function (li) { ioPassi.observe(li); });
+
+    // Righe dell'output una alla volta, come durante l'esecuzione
+    var blocchi = document.querySelectorAll('ol.passi .codice');
+    blocchi.forEach(function (b) {
+      var out = b.querySelector('pre.output');
+      if (!out) return;
+      out.innerHTML = out.innerHTML.split('\n').map(function (r) {
+        return '<span class="riga">' + (r || ' ') + '</span>';
+      }).join('');
+    });
+    var ioCodice = new IntersectionObserver(function (voci) {
+      voci.forEach(function (v) {
+        if (!v.isIntersecting) return;
+        var b = v.target; ioCodice.unobserve(b);
+        var righe = b.querySelectorAll('pre.output .riga');
+        setTimeout(function () {
+          b.classList.add('in-esecuzione');
+          righe.forEach(function (r, i) {
+            setTimeout(function () { r.style.transitionDelay = '0s'; r.parentNode.parentNode.classList.add('eseguito'); r.style.opacity = 1; r.style.transform = 'none'; }, i * 220);
+          });
+          setTimeout(function () { b.classList.remove('in-esecuzione'); }, righe.length * 220 + 400);
+        }, 600);
+      });
+    }, { threshold: 0.5 });
+    blocchi.forEach(function (b) { ioCodice.observe(b); });
+  }
+
+  // ---- Polvere di gesso al clic ----
+  document.addEventListener('pointerdown', function (e) {
+    for (var i = 0; i < 10; i++) {
+      var p = document.createElement('span');
+      p.className = 'polvere';
+      var a = Math.random() * Math.PI * 2, d = 18 + Math.random() * 34;
+      p.style.left = e.clientX + 'px'; p.style.top = e.clientY + 'px';
+      p.style.setProperty('--dx', Math.cos(a) * d + 'px');
+      p.style.setProperty('--dy', Math.sin(a) * d + 14 + 'px');
+      document.body.appendChild(p);
+      setTimeout(function (el) { el.remove(); }, 950, p);
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
